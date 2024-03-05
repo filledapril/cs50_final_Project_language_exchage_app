@@ -16,11 +16,11 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 #database
-# db = SQL("sqlite:///langex.db")
-uri = os.getenv("DATABASE_URL")
-if uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://")
-db = SQL(uri)
+db = SQL("sqlite:///langex.db")
+# uri = os.getenv("DATABASE_URL")
+# if uri.startswith("postgres://"):
+#     uri = uri.replace("postgres://", "postgresql://")
+# db = SQL(uri)
 
 @app.after_request
 def after_request(response):
@@ -143,8 +143,10 @@ def home_chart():
 
 
 @app.route("/navbar")
-@login_required
+# @login_required
 def navbar():
+    if not session.get("user_id"):
+        return jsonify(has_new_message=False)
     # pass user via data
     username = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
     if not username:
@@ -183,7 +185,7 @@ def profile():
             # since country value set to be id, no need to check exist
             #country_id = db.execute("SELECT id FROM countries WHERE name = ?", country)
             #if len(country_id) != 1:
-                return ("Please provide a correct country name.", 409)
+                # return ("Please provide a correct country name.", 409)
             #db.execute("UPDATE users SET countryId = ? WHERE id = ?", country_id[0]["id"], session["user_id"])
             db.execute("UPDATE users SET countryId = ? WHERE id = ?", country_id, session["user_id"])
         else:

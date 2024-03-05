@@ -15,12 +15,12 @@
             <form action="/login" method="post" id="loginForm">
                 <h1 class="h3 mb-3 fw-normal">Log in</h1>
                 <div class="form-floating">
-                  <input type="text" class="form-control" name="username" placeholder="Username" autofocus id="loginName">
-                  <label for="floatingInput">Username</label>
+                  <input type="text" class="form-control" name="username" placeholder="Username" autofocus id="loginName" autocomplete="username">
+                  <label for="loginName">Username</label>
                 </div>
                 <div class="form-floating">
                   <input type="password" class="form-control" name="password" placeholder="Password" id="passWord">
-                  <label for="floatingPassword">Password</label>
+                  <label for="passWord">Password</label>
                 </div>
                 <p class="errorText alert alert-danger my-1" style></p>
                 <button class="btn btn-primary w-100 py-2 my-3" type="submit">Sign in</button>

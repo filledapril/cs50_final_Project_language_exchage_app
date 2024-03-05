@@ -36,7 +36,7 @@
                 </li>
               </ul>
 
-              {% if session["user_id"] %}
+              {% if session["user_id"] is not none %}
               <ul class="nav">
                 <li class="nav-item"><a href="/profile" class="nav-link link-body-emphasis px-2" id="showUserName"></a></li>
                 <li class="nav-item"><a href="/logout" class="nav-link link-body-emphasis px-2">Log out</a></li>
