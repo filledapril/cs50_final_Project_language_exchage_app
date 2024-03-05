@@ -16,7 +16,11 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 #database
-db = SQL("sqlite:///langex.db")
+# db = SQL("sqlite:///langex.db")
+uri = os.getenv("DATABASE_URL")
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://")
+db = SQL(uri)
 
 @app.after_request
 def after_request(response):
