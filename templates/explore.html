@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+
+{% block title %}
+   Explore
+{% endblock %}
+
+{% block main %}
+<div class="pb-5 text-center">
+    <div class="row g-5">
+        <!--RIGHT-->
+        <div class="col-md-5 col-lg-8 order-md-last">
+            <h4 class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-primary">Posts</span>
+            </h4>
+            <!--CARD-->
+            <div id="postsContainer">
+            <!--fetch container-->
+            </div>
+
+            <div class=" d-grid gap-4 d-sm-flex">
+                <button class="btn btn-primary w-50" id="btnPre">previous</button>
+                <button class="btn btn-info w-50" id="btnNext">next</button>
+            </div>
+        </div>
+        <!--LEFT-->
+        <div class="col-md-7 col-lg-4">
+            <h4 class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-primary">Filter</span>
+            </h4>
+            <p class="errorText alert alert-danger my-1"></p>
+            <form>
+                <div class="row g-3">
+                    <p class="errorText alert alert-danger my-1" style></p>
+                    <p class="errorText2 alert alert-danger my-1" style></p>
+                    <!--filter-->
+                    <div class="col-12">
+
+                        <div class="row text-start my-3">
+                            <div class="col">
+                                <label for="filterSpeak" class="form-label">People can speak:</label>
+                                <select class="form-select" id="filterSpeak" name="filterSpeak">
+                                    <option disabled selected value="">Language</option>
+                                    <option value="all">All</option>
+                                    {% for speak in speak_list %}
+                                    <option value="{{ speak['speak'] }}">{{ speak['speak'] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col">
+                                <label for="filterLearn" class="form-label">People learning:</label>
+                                <select class="form-select" id="filterLearn" name="filterLearn">
+                                    <option disabled selected value="">Language</option>
+                                    <option value="all">All</option>
+                                    {% for learn in learn_list %}
+                                    <option value="{{ learn['learn'] }}">{{ learn['learn'] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row text-start my-3">
+                            <div class="col">
+                                <label for="filterCountry" class="form-label">From:</label>
+                                <select class="form-select" id="filterCountry" name="filterCountry">
+                                    <option disabled selected value="">Select</option>
+                                    <option value="all">All</option>
+                                    {% for country in country_list %}
+                                    <option value="{{ country['name'] }}">{{ country['name'] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="row text-start my-3">
+                    <div class="col">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="myPosts">
+                            <label class="form-check-label" for="myPosts">
+                                My posts
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <button class="w-100 btn btn-primary btn-lg my-3" id="filterBtn">Search</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='explore.js') }}">
+</script>
+{% endblock %}

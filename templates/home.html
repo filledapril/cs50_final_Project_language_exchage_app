@@ -1,0 +1,156 @@
+{% extends "layout.html" %}
+
+{% block title %}
+   Language exchange
+{% endblock %}
+{% block main %}
+<div class="pricing-header p-3 pb-md-4 mx-auto text-center">
+    <h1 class="display-4 fw-normal text-body-emphasis">3 Top Languages Today</h1>
+    <p class="fs-5 text-body-secondary">What is the most commonly learned language on this website, and where do most learners reside?</p>
+</div>
+<!--3 TOP-->
+<div class="row row-cols-1 row-cols-md-3 mb-3 text-center" id="pieChart">
+    <!-- ONE
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+
+      </div>
+    </div>
+    TWO
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+
+      </div>
+    </div>
+    THREE
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+
+      </div>
+    </div> -->
+
+  </div>
+  <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+    <button type="button" class="btn btn-info text-light btn-lg px-4 gap-3">Find your exchange buddy</button>
+    {% if session["user_id"] is none %}
+    <button type="button" class="btn btn-outline-warning btn-lg px-4">Sign up</button>
+    {% endif %}
+  </div>
+  <script>
+    var allData;
+    var languagesName=[];
+    // fetch data
+    document.addEventListener("DOMContentLoaded", function(){
+      fetch('/home-chart', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+      })
+      .then(res => res.json())
+      .then(fetchedData => {
+        allData = fetchedData;
+        for (let d in allData){
+          languagesName.push(d)
+        }
+        console.log('languages list: ',languagesName);
+        console.log("got data: ", allData)
+
+        // Specify the chart’s dimensions.
+        const width = 350;
+        const height = Math.min(width, 300);
+
+        // for each pie
+        for (let data in allData) {
+          let keys = [];
+          console.log('object: ', allData[data])
+          console.log('d=key: ', data);
+          for (let obj of allData[data]) {
+            keys.push(Object.keys(obj)[0])
+          }
+          console.log('keys array: ', keys)
+          // Create the color scale.
+          const color = d3.scaleOrdinal()
+              .domain(keys)
+              .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), keys.length).reverse())
+          // Create the pie layout and arc generator.
+          const pie = d3.pie()
+              .sort(null)
+              .value(d => Object.values(d)[0]);
+
+          const arc = d3.arc()
+              .innerRadius(0)
+              .outerRadius(Math.min(width, height) / 2 - 1);
+
+          const labelRadius = arc.outerRadius()() * 0.8;
+
+          // A separate arc generator for labels.
+          const arcLabel = d3.arc()
+              .innerRadius(labelRadius)
+              .outerRadius(labelRadius);
+
+          const arcs = pie(allData[data]);
+
+          // Create the SVG
+          let container = d3.select("#pieChart");
+          let col = d3.create("div")
+              .attr("class", "col")
+          let card = d3.create("div")
+              .attr("class", "card mb-4 rounded-3 shadow-sm")
+          let cardHeader = d3.create("div")
+              .attr("class", "card-header  py-3")
+          let title = d3.create("h4")
+              .attr("class", "my-0 fw-normal")
+              .text(data)
+
+          const svg = d3.create("svg")
+              .attr("class", "p-3")
+              .attr("width", width)
+              .attr("height", height)
+              .attr("viewBox", [-width / 2, -height / 2, width, height])
+              .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif;");
+
+          // Add a sector path for each value.
+          svg.append("g")
+              .attr("stroke", "white")
+            .selectAll()
+            .data(arcs)
+            .join("path")
+              .attr("fill", d => color(Object.keys(d.data)[0]))
+              .attr("d", arc)
+            .append("title")
+              .text(d => `${Object.keys(d.data)[0]}: ${Object.values(d.data)[0].toLocaleString("en-US")}`)
+
+          container.node().appendChild(col.node())
+          col.node().appendChild(card.node())
+          cardHeader.node().appendChild(title.node())
+          card.node().appendChild(cardHeader.node())
+          card.node().appendChild(svg.node())
+          // Create a new arc generator to place a label close to the edge.
+          // The label shows the value if there is enough room.
+          svg.append("g")
+              .attr("text-anchor", "middle")
+            .selectAll()
+            .data(arcs)
+            .join("text")
+              .attr("transform", d => `translate(${arcLabel.centroid(d)})`)
+              .call(text => text.append("tspan")
+                  .attr("y", "-0.4em")
+                  .attr("font-weight", "bold")
+                  .text(d => Object.keys(d.data)[0]))
+              .call(text => text.filter(d => (d.endAngle - d.startAngle) > 0.25).append("tspan")
+                  .attr("x", 0)
+                  .attr("y", "0.7em")
+                  .attr("fill-opacity", 0.7)
+                  .text(d => `${Object.values(d.data)[0].toLocaleString("en-US")}%`));
+        }
+
+      })
+      .catch((error) => {
+        console.error('Error: ', error);
+      })
+
+
+  });
+  </script>
+{% endblock %}

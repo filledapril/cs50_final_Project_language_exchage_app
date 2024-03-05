@@ -1,0 +1,186 @@
+{% extends "layout.html" %}
+
+{% block title %}
+   Saved
+{% endblock %}
+
+{% block main %}
+<div class="px-4">
+    <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary">
+        <a href="/saved" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
+            <image class="me-2" width="30" height="30" src="../static/saved.png" alt="saved"></image>
+            <span class="fs-5 fw-semibold">Saved posts</span>
+        </a>
+        <div class="list-group list-group-flush border-bottom p-1" style="height: 50vh; overflow-y: scroll;">
+            <!--saved LIST-->
+            {% if saved_list is not none %}
+            {% for saved in saved_list %}
+            <div class="card mb-1" style="width: auto" id="saved-list{{ saved.savedId }}">
+                <div class="card-body" style="height: auto">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-start" id="speakPreview">Speak: {{ saved.speak }}</h5>
+                            <h5 class="card-title mb-2 text-body-secondary text-start" id="learnPreview">Learn: {{ saved.learn }}</h5>
+                        </div>
+                        <div>
+                            <p class="card-text mt-3 text-end" id="exampleDate">{{ saved.date }}</p>
+                        </div>
+                    </div>
+
+                    <p class="card-text" id="introPreview">
+                        {{ saved.intro }}
+                    </p>
+
+                    <div class="row">
+                        <div class="col">
+                            <div class=" d-grid gap-4 d-sm-flex">
+                                <button class="btn btn-outline-success savedSendBtn" value="{{ saved.savedId }}">Send message</button>
+                                <button class="btn btn-outline-danger savedDeleteBtn" value="{{ saved.savedId }}" id="only-for-save-again{{ saved.postId }}">Delete from saved</button>
+                            </div>
+                        </div>
+                        <div class="col text-end">
+                            <p class="d-inline card-text">{{ saved.username }}</p>
+                            <img src="{{ saved.flag }}" alt="flag" class="d-inline" width="24" height="16">
+                            <p class="card-text">{{ saved.email }}</p>
+                        </div>
+                    </div>
+                    <!--message box area-->
+                    <div class="form-floating" id="saved-msg-box{{ saved.savedId }}" style="display: none">
+                        <textarea
+                        class="form-control"
+                        placeholder="Leave a message here"
+                        id="saved-msg-input{{ saved.savedId }}"
+                        name="saved-msg-input{{ saved.savedId }}"
+                        style="height: 100px"
+                        maxlength="260"></textarea>
+                        <label for="saved-msg-input{{ saved.savedId }}" id="saved-msg-label{{saved.savedId}}">leave message here(260 characters max.)</label>
+                        <button class="btn btn-success mx-auto col-6 mt-3 send-button" value="{{ saved.userId }}">
+                            Confirm and send
+                        </button>
+                    </div>
+                    <!--message box end here-->
+                </div>
+            </div>
+            {% endfor%}
+            {% else %}
+            <div class="list-group-item disabled py-3 lh-sm">No post saved.</div>
+            {% endif %}
+            <!--saved LIST end-->
+        </div>
+
+
+    </div>
+</div>
+<script>
+// handle send message button
+let boxOpened = {};
+let btnValue;
+document.addEventListener('click', function(e) {
+    if (e.target.matches(".savedSendBtn")) {
+        console.log("click saved - send message")
+        btnValue = e.target.value;
+        let msgBox = document.querySelector(`#saved-msg-box${btnValue}`);
+        if (boxOpened[btnValue]) {
+            msgBox.style.display = "none";
+            e.target.textContent = "Send Message";
+        } else {
+            msgBox.style.display = "block";
+            e.target.textContent = "Close👇🏻";
+        }
+        boxOpened[btnValue] = !boxOpened[btnValue];
+    };
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target.matches(".send-button")) {
+        let receiverId = e.target.value;
+        let textArea = document.querySelector(`#saved-msg-input${btnValue}`);
+        let messageText = textArea.value;
+        let label = document.querySelector(`#saved-msg-label${textArea.id.split('saved-msg-input')[1]}`)
+        console.log("reveiver msg", messageText);
+        fetch("/saved", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                receiverId: receiverId,
+                messageText: messageText
+            }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.isSent) {
+                label.textContent = "your message was successfully sent!";
+                messageText = "";
+            } else {
+                label.textContent = "Failed to send message. please contact app's owner. error:" + data.error;
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        })
+    }
+})
+
+// handle delete from saved
+let savedId;
+document.addEventListener('click', function(e) {
+    if (e.target.matches(".savedDeleteBtn")) {
+        savedId = e.target.value;
+        fetch("/saved", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                savedId: savedId
+            }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.isDelete){
+                e.target.classList.remove("savedDeleteBtn", "btn-outline-danger");
+                e.target.classList.add("savedAgain", "btn-outline-primary");
+                e.target.textContent = "Save";
+            } else {
+                window.alert("Failed to removed. Something went wrong. :(Server Error:", data.error);
+            }
+        })
+        .catch((error) => {
+            console.error('Error: ', error);
+        })
+    }
+})
+
+//save again
+document.addEventListener('click', function(e){
+    if (e.target.matches(".savedAgain")) {
+        let postId = e.target.id.split('only-for-save-again')[1];
+        console.log("save again id:", postId)
+        fetch("/save-action", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                post_id: postId
+            }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.isSaved) {
+                e.target.classList.add("savedDeleteBtn", "btn-outline-danger");
+                e.target.classList.remove("savedAgain", "btn-outline-primary");
+                e.target.textContent = "Remove from saved";
+            } else {
+                window.alert("Failed to removed. Something went wrong. :(Server Error:" + data.error);
+            }
+        })
+        .catch((error) => {
+            console.error('Error: ', error);
+        })
+    }
+})
+</script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Sign Up
+{% endblock %}
+
+{% block main %}
+    <div class="container-fluid h-custom">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-md-9 col-lg-6 col-xl-5">
+          <img src="../static/signup.png"
+            class="img-fluid" alt="share and speak login">
+        </div>
+        <div class="col-md-9 col-lg-6 col-xl-4 offset-xl-1">
+            <form action="/register" method="post" id="form">
+                <h1 class="h3 mb-3 fw-normal">Sign up</h1>
+                <div class="form-floating">
+                  <input type="text" class="form-control" name="username" placeholder="Username" autofocus>
+                  <label>Username</label>
+                </div>
+                <div class="form-floating">
+                  <input type="password" class="form-control" name="password" placeholder="Password" id="pass1">
+                  <label>Password</label>
+                </div>
+                <div class="form-floating">
+                    <input type="password" class="form-control" name="password2" placeholder="Password" id="pass2">
+                    <label>Confirm password</label>
+                </div>
+                <p class="errorText alert alert-danger my-1" style></p>
+                <button class="btn btn-primary w-100 py-2 my-3" type="submit">Sign in</button>
+                <p class="mt-5 text-body-secondary">Share&Speak</p>
+              </form>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.querySelector("#form").addEventListener("submit", function(e){
+        let p1 = document.querySelector("#pass1");
+        let p2 = document.querySelector("#pass2");
+        let errorText = document.querySelector(".errorText")
+        if (p1.value != p2.value) {
+          p1.style.color = "red";
+          p2.style.color = "red";
+          errorText.style.display = "block"
+          errorText.innerHTML = "Password should be same."
+          e.preventDefault()
+        }
+        else {
+          errorText.style.display = "none"
+        }
+      })
+    </script>
+{% endblock %}

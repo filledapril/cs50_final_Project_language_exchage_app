@@ -1,0 +1,98 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{user[0]["username"]}}'s profile
+{% endblock %}
+
+{% block main %}
+
+    <!--RIGHT-->
+    <div class="row g-5">
+        <div class="col-md-5 col-lg-4 order-md-last">
+            <h4 class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-primary">Current profile</span>
+            </h4>
+            <ul class="list-group mb-3">
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                    <div>
+                        <h6 class="my-0">Username:</h6>
+                    </div>
+                    <span class="text-body-secondary">{{user[0]["username"]}}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                    <div>
+                        <h6 class="my-0">E-mail:</h6>
+                    </div>
+                    <span class="text-body-secondary">{{user[0]["email"]}}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                    <div>
+                        <h6 class="my-0">From:</h6>
+                    </div>
+                    <span class="text-body-secondary"><img src="{{ flag_src }}" alt="flag" width="32" height="24"></span>
+                </li>
+            </ul>
+        </div>
+        <!--LEFT-->
+        <div class="col-md-7 col-lg-8">
+            <form action="/edit-profile" method="post" id="editProfileForm">
+                <div class="row g-3">
+                    <p class="errorText alert alert-danger my-1" style></p>
+                    <p class="errorText2 alert alert-danger my-1" style></p>
+                    <!--email input-->
+                    <div class="col-12">
+                        <label for="email" class="form-label">Email</label>
+                        <input value="{{ user[0]['email'] }}" type="email" class="form-control" id="edit-email" placeholder="you@example.com" name="email">
+                    </div>
+                    <!--country selector-->
+                    <div class="col-12">
+                        <label for="country" class="form-label">Country</label>
+                        <select class="form-select" id="edit-country" name="country">
+                          {% if user[0]["countryId"] is none %}
+                          <option disabled selected value>Country</option>
+                          {% endif %}
+                          {% for country in countries %}
+                            {% if country.id == user[0]["countryId"] %}
+                                <option value="{{country.id}}" selected>{{country.name}}</option>
+                            {% else %}
+                                <option value="{{country.id}}">{{country.name}}</option>
+                            {% endif %}
+                          {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <button class="w-100 btn btn-primary btn-lg my-3" type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.querySelector("#editProfileForm").addEventListener("submit", function(e){
+            let email = document.querySelector("#edit-email");
+            let country = document.querySelector("#edit-country");
+            let errorText = document.querySelector(".errorText");
+            let errorText2 = document.querySelector(".errorText2");
+            const re =
+                /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+            if (email.value != "" && email.value != null) {
+                if (!email.value.match(re)) {
+                    email.style.color = "red";
+                    errorText.innerHTML = "Please provide a correct email address."
+                    errorText.style.display = "block";
+                    e.preventDefault();
+                } else {
+                    errorText.innerHTML = "";
+                    errorText.style.display = "none";
+                }
+            }
+            if (country.value == "" || country.value == null) {
+                errorText2.innerHTML = "Please select a country."
+                errorText2.style.display = "block";
+                e.preventDefault();
+            } else {
+                errorText2.innerHTML = "";
+                errorText2.style.display = "none";
+            }
+        })
+    </script>
+    </script>
+{% endblock %}

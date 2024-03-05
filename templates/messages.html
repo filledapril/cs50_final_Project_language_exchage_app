@@ -1,0 +1,271 @@
+{% extends "layout.html" %}
+
+{% block title %}
+   Messages
+{% endblock %}
+
+{% block main %}
+<div class="px-4">
+    <div class="row justify-content-center">
+        <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary">
+            <a href="/messages" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
+              <image class="me-2" width="30" height="30" src="../static/messages.png" alt="messages"></image>
+              <span class="fs-5 fw-semibold">Messages</span>
+            </a>
+            <div class="list-group list-group-flush border-bottom" style="height: 45vh; overflow-y: scroll;">
+
+              <!--messages LIST -->
+              <div id="messagesContent">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="list-group-item list-group-item-action py-3 lh-sm msgList" id="msg{{message.msgId}}">
+                    <div class="d-flex w-100 align-items-center justify-content-between">
+                      <strong class="mb-1">{{ message.senderName }}</strong>
+                      <div>
+                        {% if message.read is none %}
+                        <span class="badge text-bg-primary rounded-pill newSpan">new</span>
+                        {% endif %}
+                        <button
+                        type="button"
+                        class="btn-close deleteBtn"
+                        aria-label="Close"
+                        value="{{message.msgId}}"
+                        data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                        </button>
+
+                      </div>
+                    </div>
+                    <!--height: 1rem; class text-truncate-->
+                    <div class="col-8 mx-auto mb-1 showMsg overflow-hidden" style="height: 1rem">
+                        <div class="text-start mb-3 small text-truncate">
+                          {{ message.message }}
+                        </div>
+                    <!--reply button-->
+                        <button
+                        type="button"
+                        class="btn btn-info replyBtn"
+                        value="{{message.senderId}}"
+                        id="reply{{ message.msgId }}"
+                        data-bs-toggle="modal" data-bs-target="#replyWindow">
+                        Reply to {{ message.senderId }}
+                        </button>
+                    </div>
+
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="list-group-item disabled py-3 lh-sm">
+                    No new message.
+                </div>
+                {% endif %}
+
+              </div><!--end content-->
+
+            </div>
+          </div>
+          <!--confirm delete-->
+          <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content rounded-3 shadow">
+                <div class="modal-body p-4 text-center">
+                  <h5 class="mb-0">Delete this message?</h5>
+                  <p class="mb-0">**This action is not reversible.</p>
+                </div>
+                <div class="modal-footer flex-nowrap p-0">
+                  <button type="button" id="confirmBtn" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 py-3 m-0 rounded-0 border-end" data-bs-dismiss="modal">
+                    <strong>Yes, delete it</strong>
+                  </button>
+                  <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 py-3 m-0 rounded-0" data-bs-dismiss="modal">No thanks</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--reply area-->
+          <div class="modal fade" id="replyWindow" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="replyWindowLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+              <div class="modal-content">
+
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="staticBackdropLabel">Reply</h1>
+                  <button type="button" class="btn-close replyDeleteBtn" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body form-floating">
+                  <textarea class="form-control" placeholder="message..." id="replyInput" style="height: 100px" required></textarea>
+                  <label for="replyInput" class="small text-secondary mx-3">260 characters max</label>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="replySendBtn">Confirm and Send</button>
+                </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+    </div>
+</div>
+<script>
+//handle message click
+let showed = [];
+document.addEventListener("DOMContentLoaded", function(){
+  document.addEventListener('click', function(e) {
+    //e.preventDefault();
+    // get the click area
+    let msgList = e.target.closest(".msgList");
+    if (msgList) {
+      console.log(`message clicked. msgList id = ${msgList.id}, showed:${showed}`);
+      // decide to show or close
+      let msgId = msgList.id.split("msg")[1];
+      let showMsg = msgList.querySelector(".showMsg");
+      if (!showed.includes(msgId)) {
+        console.log(`opening showed: ${showed}`);
+        showed.push(msgId);
+        showMsg.style.height = "auto";
+        showMsg.classList.remove("text-truncate");
+        let newSpan = msgList.querySelector(".newSpan");
+        if (newSpan) {
+             newSpan.remove();
+        }
+      } else if (showed.includes(msgId)) {
+        console.log("closing!")
+        let result = showed.filter((r) => r != msgId)
+        showed = result;
+        showMsg.style.height = "1rem";
+        showMsg.classList.add("text-truncate");
+      }
+      // fetch messages read status
+      ////////////////////////////////
+      fetch("/messages", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            msgId: msgId
+        }),
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.success) {
+          console.log("not new confirm.")
+        }
+      })
+      .catch((error) => {
+          console.error('Error:', error);
+      })
+    }
+  });
+});
+
+// handle delete messages
+////////////////////
+document.addEventListener("DOMContentLoaded", function(){
+  let closeMsgId;
+  let confirmBtn = document.querySelector("#confirmBtn");
+  document.querySelectorAll(".deleteBtn").forEach(function(deleteBtn) {
+    deleteBtn.addEventListener('click', function(e) {
+      e.stopPropagation()
+      closeMsgId = deleteBtn.value;
+    })
+  })
+  // confirm and send
+  confirmBtn.addEventListener("click", function(e) {
+    e.preventDefault();
+      fetch("/messages", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            deletId: closeMsgId
+        }),
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log(data)
+        if(data.success){
+          document.querySelector(`#msg${closeMsgId}`).remove();
+          console.log("confirm delete");
+        } else if(data.error) {
+          console.log("fail to delete, error:", data.error);
+          window.alert("Something went wrong, try again later.")
+        }
+      })
+      .catch((error) => {
+        console.log('Javascript Error:', error);
+      })
+  });
+});
+
+//handle reply button
+///////////////////
+document.addEventListener("DOMContentLoaded", function(){
+  let replyMsgId;
+  let senderId;
+  let replySendBtn = document.querySelector('#replySendBtn');
+  //click reply button
+  //////////////////////
+  document.querySelectorAll('.replyBtn').forEach(function(replyBtn) {
+    replyBtn.addEventListener("click", function(e){
+      e.stopPropagation()
+      let showMsg = e.target.parentNode;
+      console.log("parentNode", showMsg);
+      replyMsgId = e.target.id.split("reply")[1];
+      senderId = e.target.value;
+      console.log(`reply clicked senderID: ${senderId}`);
+      // recover the message display
+      if (!showed.includes(replyMsgId)) {
+        console.log("controling the space!")
+        showed.push(replyMsgId);
+      }
+      showMsg.style.height = "auto";
+      showMsg.classList.remove("text-truncate");
+    });
+  });
+
+
+    // send message
+  ///////////////////
+  replySendBtn.addEventListener("click", function(e) {
+    e.preventDefault();
+    let replyMsg = document.querySelector("#replyInput");
+    console.log(`reply text "${replyMsg.value}", receiver id ${senderId}`)
+    if (replyMsg.value == "") {
+      window.alert("reply message can not be empty.")
+      e.preventDefault();
+      return;
+    }
+    console.log("sending reply to ", senderId)
+    fetch("/messages", {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+          //reply to sender
+          ///////////////////////
+          receiverId: senderId,
+          message: replyMsg.value
+      }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      if(data.success) {
+        console.log("reply success!")
+        window.alert("Your reply was sended successfully!")
+        replyMsg.value = "";
+      } else {
+        coonsole.log("unsuccessful reply.")
+      }
+    })
+    .catch((error) => {
+      console.log('Error:', error);
+      window.alert("Something went wrong, try again later.")
+    })
+  });
+
+})
+
+</script>
+{% endblock %}
