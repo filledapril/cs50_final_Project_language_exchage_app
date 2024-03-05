@@ -155,7 +155,7 @@ def navbar():
         # Redirect user to login form
         return redirect(url_for("login"))
     try:
-        has_new_message = db.execute("SELECT read FROM messages WHERE receiverId = ? AND read = ?", session["user_id"], None)
+        has_new_message = db.execute("SELECT * FROM messages WHERE receiverId = ? AND read is NULL", session["user_id"])
         if has_new_message:
             print("new message")
             return jsonify(username = username, has_new_message=True)
