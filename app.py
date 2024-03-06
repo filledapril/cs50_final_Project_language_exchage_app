@@ -540,12 +540,14 @@ def saved():
             #check if post exist in saved
             saved = db.execute("SELECT * FROM saved WHERE id = ?", deleteId)
             if not saved:
+                print("did not save.")
                 return jsonify(success=False, isDelete=False, error="You did not save this post. Refresh the page.")
             else:
                 try:
                     db.execute("DELETE FROM saved WHERE id =?", deleteId)
                     return jsonify(success=True, isDelete=True)
                 except Exception as e:
+                    print(f"exception: {e}")
                     return jsonify(success=False, isDelete=False, error=str(e))
         # check if user exist and store message to db
         if receiver_id and not message:

@@ -31,9 +31,9 @@
 
   </div>
   <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-    <button type="button" class="btn btn-info text-light btn-lg px-4 gap-3" href="/explore">Find your exchange buddy</button>
+    <a href="/explore"><button type="button" class="btn btn-info text-light btn-lg px-4 gap-3">Find your exchange buddy</button></a>
     {% if not session.get("user_id") %}
-    <button type="button" class="btn btn-outline-warning btn-lg px-4" href="/register">Sign up</button>
+    <a href="/register"><button type="button" class="btn btn-outline-warning btn-lg px-4">Sign up</button></a>
     {% endif %}
   </div>
   <script>

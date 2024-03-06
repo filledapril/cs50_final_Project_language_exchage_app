@@ -173,6 +173,7 @@ document.addEventListener('click', function(e){
                 e.target.classList.add("savedDeleteBtn", "btn-outline-danger");
                 e.target.classList.remove("savedAgain", "btn-outline-primary");
                 e.target.textContent = "Remove from saved";
+                location.reload();
             } else {
                 window.alert("Failed to removed. Something went wrong. :(Server Error:" + data.error);
             }

@@ -80,7 +80,9 @@
         .then(data => {
           let username = data.username;
           let hasNewMsg = data.has_new_message;
-          document.querySelector("#showUserName").textContent = username;
+          if (username) {
+            document.querySelector("#showUserName").textContent = username;
+          }
           if (hasNewMsg) {
             document.querySelector("#navbarMsg").style.display = "none";
             document.querySelector("#showNew").style.display = "block";
